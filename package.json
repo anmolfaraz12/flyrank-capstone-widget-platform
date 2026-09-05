@@ -1,0 +1,35 @@
+{
+  "name": "flyrank-capstone-widget-platform",
+  "version": "1.0.0",
+  "description": "A backend platform for creating embeddable lead-capture widgets — a customer defines a widget, gets one &lt;script> line, and the platform safely handles cross-origin submissions with validation, rate limiting, spam protection, and geo enrichment.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anmolfaraz12/flyrank-capstone-widget-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/anmolfaraz12/flyrank-capstone-widget-platform/issues"
+  },
+  "homepage": "https://github.com/anmolfaraz12/flyrank-capstone-widget-platform#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.115.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.23.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
