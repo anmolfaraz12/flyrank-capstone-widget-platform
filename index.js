@@ -17,7 +17,7 @@ const WidgetInputSchema = z.object({
   button_text: z.string().min(1).default('Submit'),
 });
 
-// --- Walking skeleton endpoint: create a widget ---
+// --- Create a widget ---
 app.post('/widgets', requireAuth, async (req, res) => {
   const parseResult = WidgetInputSchema.safeParse(req.body);
 
@@ -38,6 +38,71 @@ app.post('/widgets', requireAuth, async (req, res) => {
   );
 
   res.status(201).json(result.rows[0]);
+});
+
+// --- List the caller's own widgets only ---
+app.get('/widgets', requireAuth, async (req, res) => {
+  const result = await pool.query(
+    `SELECT * FROM widgets WHERE tenant_id = $1 ORDER BY created_at DESC`,
+    [req.tenant.id]
+  );
+  res.status(200).json(result.rows);
+});
+
+// --- Get one widget, only if it belongs to the caller ---
+app.get('/widgets/:id', requireAuth, async (req, res) => {
+  const result = await pool.query(
+    `SELECT * FROM widgets WHERE id = $1 AND tenant_id = $2`,
+    [req.params.id, req.tenant.id]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Widget not found' });
+  }
+
+  res.status(200).json(result.rows[0]);
+});
+
+// --- Update a widget, only if it belongs to the caller ---
+app.put('/widgets/:id', requireAuth, async (req, res) => {
+  const parseResult = WidgetInputSchema.safeParse(req.body);
+
+  if (!parseResult.success) {
+    return res.status(400).json({
+      error: 'Invalid widget data',
+      details: parseResult.error.issues,
+    });
+  }
+
+  const { type, title, description, fields, button_text } = parseResult.data;
+
+  const result = await pool.query(
+    `UPDATE widgets
+     SET type = $1, title = $2, description = $3, fields = $4, button_text = $5, updated_at = now()
+     WHERE id = $6 AND tenant_id = $7
+     RETURNING *`,
+    [type, title, description ?? null, JSON.stringify(fields), button_text, req.params.id, req.tenant.id]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Widget not found' });
+  }
+
+  res.status(200).json(result.rows[0]);
+});
+
+// --- Delete a widget, only if it belongs to the caller ---
+app.delete('/widgets/:id', requireAuth, async (req, res) => {
+  const result = await pool.query(
+    `DELETE FROM widgets WHERE id = $1 AND tenant_id = $2 RETURNING id`,
+    [req.params.id, req.tenant.id]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: 'Widget not found' });
+  }
+
+  res.status(204).send();
 });
 
 const PORT = process.env.PORT || 4000;
