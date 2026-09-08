@@ -228,6 +228,82 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
+// ============================================================
+// DASHBOARD — authenticated (owner only)
+// ============================================================
+
+// --- List submissions for a widget the caller owns (spam excluded by default) ---
+app.get('/dashboard/widgets/:id/submissions', requireAuth, async (req, res) => {
+  // First confirm the widget belongs to this tenant — never trust :id alone
+  const widgetCheck = await pool.query(
+    `SELECT id FROM widgets WHERE id = $1 AND tenant_id = $2`,
+    [req.params.id, req.tenant.id]
+  );
+
+  if (widgetCheck.rows.length === 0) {
+    return res.status(404).json({ error: 'Widget not found' });
+  }
+
+  const includeSpam = req.query.include_spam === 'true';
+
+  const result = await pool.query(
+    `SELECT id, data, ip_address, geo_country, geo_city, is_spam, created_at
+     FROM submissions
+     WHERE widget_id = $1 ${includeSpam ? '' : 'AND is_spam = false'}
+     ORDER BY created_at DESC`,
+    [req.params.id]
+  );
+
+  res.status(200).json(result.rows);
+});
+
+// --- Basic stats: total counts, counts over time, geo breakdown ---
+app.get('/dashboard/widgets/:id/stats', requireAuth, async (req, res) => {
+  const widgetCheck = await pool.query(
+    `SELECT id FROM widgets WHERE id = $1 AND tenant_id = $2`,
+    [req.params.id, req.tenant.id]
+  );
+
+  if (widgetCheck.rows.length === 0) {
+    return res.status(404).json({ error: 'Widget not found' });
+  }
+
+  const totalsResult = await pool.query(
+    `SELECT
+       COUNT(*) FILTER (WHERE is_spam = false) AS valid_count,
+       COUNT(*) FILTER (WHERE is_spam = true) AS spam_count
+     FROM submissions
+     WHERE widget_id = $1`,
+    [req.params.id]
+  );
+
+  const byDayResult = await pool.query(
+    `SELECT DATE(created_at) AS day, COUNT(*) AS count
+     FROM submissions
+     WHERE widget_id = $1 AND is_spam = false
+     GROUP BY DATE(created_at)
+     ORDER BY day DESC
+     LIMIT 30`,
+    [req.params.id]
+  );
+
+  const byGeoResult = await pool.query(
+    `SELECT COALESCE(geo_country, 'unknown') AS country, COUNT(*) AS count
+     FROM submissions
+     WHERE widget_id = $1 AND is_spam = false
+     GROUP BY geo_country
+     ORDER BY count DESC`,
+    [req.params.id]
+  );
+
+  res.status(200).json({
+    valid_submissions: parseInt(totalsResult.rows[0].valid_count, 10),
+    spam_submissions: parseInt(totalsResult.rows[0].spam_count, 10),
+    by_day: byDayResult.rows,
+    by_country: byGeoResult.rows,
+  });
+});
+
 const PORT = process.env.PORT || 4000;
 
 initDb()
