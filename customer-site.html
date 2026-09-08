@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Website (a different origin)</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; }
+    .fake-content { color: #333; }
+  </style>
+</head>
+<body>
+  <h1>Welcome to My Blog</h1>
+  <p class="fake-content">
+    This is a plain HTML page pretending to be a customer's website. It is served
+    from a completely different origin (a different local port) than the widget
+    platform's API — which is exactly what proves the embed and CORS setup works
+    for real, not just in Postman/PowerShell.
+  </p>
+  <p class="fake-content">
+    Below is the actual embedded widget, loaded via a single script tag — nothing
+    else on this page knows or cares how it works internally.
+  </p>
+
+  <hr />
+
+  <!-- The embed snippet a real customer would paste onto their site -->
+  <script src="http://localhost:4000/widget.v1.js?id=464c8ce5-33a3-404b-9858-d792b4dc55a9"></script>
+</body>
+</html>

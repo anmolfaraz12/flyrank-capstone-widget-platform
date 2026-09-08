@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { z } = require('zod');
+const fs = require('fs');
+const path = require('path');
 const { pool, initDb } = require('./db');
 const requireAuth = require('./middleware/requireAuth');
 const { lookupGeo } = require('./lib/geo');
@@ -129,6 +131,14 @@ app.delete('/widgets/:id', requireAuth, async (req, res) => {
 // ============================================================
 // PUBLIC SURFACE — no auth. Called by visitor browsers on any origin.
 // ============================================================
+
+// --- Versioned widget bundle — cache forever, since the URL itself changes on release ---
+app.get('/widget.v1.js', (req, res) => {
+  const bundlePath = path.join(__dirname, 'widget.v1.js');
+  res.set('Content-Type', 'application/javascript');
+  res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  res.sendFile(bundlePath);
+});
 
 // --- Public widget config, for the embed script to render the form ---
 app.get('/widgets/:id/config', async (req, res) => {
