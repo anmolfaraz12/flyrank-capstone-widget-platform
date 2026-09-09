@@ -1,0 +1,84 @@
+# FlyRank Capstone — Embeddable Widget & Lead-Capture Platform
+# Manifest read by the automated evaluator.
+
+run: node index.js
+seed: node seed.js
+base_url: http://localhost:4000
+
+# No automated test suite (stretch goal, not built) — evidence is
+# manual, see EVIDENCE.md for real command/output for every requirement.
+test: null
+
+endpoints:
+  # Public — widget delivery
+  - method: GET
+    path: /widget.v1.js
+    auth: false
+    description: Versioned, long-cached embeddable JS bundle
+
+  - method: GET
+    path: /widgets/{id}/config
+    auth: false
+    description: Public widget config, short-lived cache headers
+    example_id: 464c8ce5-33a3-404b-9858-d792b4dc55a9
+
+  # Public — submission
+  - method: POST
+    path: /widgets/{id}/submissions
+    auth: false
+    description: >
+      Cross-origin visitor submission. Validated (Zod), rate-limited
+      (per-IP 20/min, per-widget 60/min), honeypot spam check (_hp field),
+      geo-enriched (ip-api.com -> ipapi.co -> null), safe email side
+      effect (failure never blocks the 201 response).
+    example_id: 464c8ce5-33a3-404b-9858-d792b4dc55a9
+
+  # Authenticated — widget management (requires Bearer token, see
+  # getToken.js / token.txt)
+  - method: POST
+    path: /widgets
+    auth: true
+    description: Create a widget for the authenticated tenant
+
+  - method: GET
+    path: /widgets
+    auth: true
+    description: List the authenticated tenant's widgets
+
+  - method: GET
+    path: /widgets/{id}
+    auth: true
+    description: Get one widget (tenant-isolated)
+
+  - method: PUT
+    path: /widgets/{id}
+    auth: true
+    description: Update a widget (tenant-isolated)
+
+  - method: DELETE
+    path: /widgets/{id}
+    auth: true
+    description: Delete a widget (tenant-isolated)
+
+  # Authenticated — dashboard
+  - method: GET
+    path: /dashboard/widgets/{id}/submissions
+    auth: true
+    description: List submissions for a widget, spam excluded by default
+    example_id: 464c8ce5-33a3-404b-9858-d792b4dc55a9
+
+  - method: GET
+    path: /dashboard/widgets/{id}/stats
+    auth: true
+    description: >
+      Aggregate stats for a widget: valid/spam counts, by_day, by_country
+    example_id: 464c8ce5-33a3-404b-9858-d792b4dc55a9
+
+notes:
+  - Demo tenant is test@example.com (created by seed.js via Supabase Auth).
+  - Get a bearer token for the demo tenant with `node getToken.js`,
+    then read it from token.txt. Tokens expire after ~1 hour.
+  - Postgres runs on port 5433 (docker compose up -d) — not the
+    Postgres default 5432.
+  - Cross-origin proof page: customer-site.html, served on a second
+    origin (npx serve -p 5500), separate from the API on port 4000.
