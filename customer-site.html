@@ -4,26 +4,94 @@
   <meta charset="UTF-8" />
   <title>Customer Website (a different origin)</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 60px auto; padding: 0 20px; }
-    .fake-content { color: #333; }
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 60px 20px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .blog-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 16px 0;
+      font-size: 32px;
+      color: #2d2d2d;
+    }
+
+    .fake-content {
+      color: #555;
+      line-height: 1.6;
+      font-size: 15px;
+      margin: 0 0 16px 0;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #fff0f2;
+      color: #ff6a88;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 28px 0;
+    }
+
+    .widget-slot {
+      display: flex;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
-  <h1>Welcome to My Blog</h1>
-  <p class="fake-content">
-    This is a plain HTML page pretending to be a customer's website. It is served
-    from a completely different origin (a different local port) than the widget
-    platform's API — which is exactly what proves the embed and CORS setup works
-    for real, not just in Postman/PowerShell.
-  </p>
-  <p class="fake-content">
-    Below is the actual embedded widget, loaded via a single script tag — nothing
-    else on this page knows or cares how it works internally.
-  </p>
+  <div class="page">
+    <div class="blog-card">
+      <span class="badge">Demo Blog</span>
+      <h1>Welcome to My Blog</h1>
+      <p class="fake-content">
+        This page plays the part of a real customer's website — served from its own
+        origin, completely separate from the widget platform's API. That separation
+        is the whole point: it's what proves the embed and CORS setup genuinely works
+        in a browser, not just in a terminal.
+      </p>
+      <p class="fake-content">
+        Everything below is the real embedded widget, dropped in with a single
+        script tag. The blog itself has no idea how the widget works under the
+        hood — and it doesn't need to.
+      </p>
 
-  <hr />
+      <hr />
 
-  <!-- The embed snippet a real customer would paste onto their site -->
-  <script src="http://localhost:4000/widget.v1.js?id=464c8ce5-33a3-404b-9858-d792b4dc55a9"></script>
+      <div class="widget-slot">
+        <!-- The embed snippet a real customer would paste onto their site -->
+        <script src="http://localhost:4000/widget.v1.js?id=464c8ce5-33a3-404b-9858-d792b4dc55a9"></script>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
