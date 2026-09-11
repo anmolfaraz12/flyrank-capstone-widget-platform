@@ -1,4 +1,3 @@
-markdown
 # FlyRank Capstone — Embeddable Widget & Lead-Capture Platform
 
 Let a customer define a widget, hand them one line of `<script>`, and safely
@@ -26,48 +25,53 @@ The three request paths (owner management, public widget delivery, public
 submission) are kept fully separate, as shown below.
 
 ## Architecture
-Widget Owner (authenticated, Supabase JWT)
-|
-v
-Widget Management API ---> Postgres (tenants / widgets / submissions)
-(POST/GET/PUT/DELETE /widgets) tenant-isolated on every query
-|
-v
-Embed snippet returned to owner
 
-<script src=".../widget.v1.js?id=WIDGET_ID"></script>
+```
+Widget Owner (authenticated, Supabase JWT)
+  |
+  v
+Widget Management API  --->  Postgres (tenants / widgets / submissions)
+  (POST/GET/PUT/DELETE /widgets)     tenant-isolated on every query
+  |
+  v
+Embed snippet returned to owner
+  <script src=".../widget.v1.js?id=WIDGET_ID"></script>
+
+
 Customer Website (any origin, e.g. localhost:5500)
-|
-v
-GET /widget.v1.js (public, long-cache, versioned bundle)
-|
-v
-GET /widgets/:id/config (public, short-cache, CORS enabled)
-|
-v
+  |
+  v
+GET /widget.v1.js           (public, long-cache, versioned bundle)
+  |
+  v
+GET /widgets/:id/config     (public, short-cache, CORS enabled)
+  |
+  v
 Widget renders on the page
 
+
 Website Visitor
-|
-v
-POST /widgets/:id/submissions (public, CORS + preflight handled)
-|
-|-- Zod validation -------- bad payload? --> 4xx, JSON error, never 500
-|-- Rate limit (per-IP 20/min, per-widget 60/min) -- burst? --> 429
-|-- Honeypot check (_hp field filled) -- bot? --> is_spam = true, still 201
-|-- Geo enrichment: ip-api.com --(fails)--> ipapi.co --(fails)--> nulls
-|-- Store submission (never blocks on the steps above)
-|-- Safe side effect: confirmation email (try/catch, failure never
-blocks the 201 response)
+  |
+  v
+POST /widgets/:id/submissions   (public, CORS + preflight handled)
+  |
+  |-- Zod validation -------- bad payload? --> 4xx, JSON error, never 500
+  |-- Rate limit (per-IP 20/min, per-widget 60/min) -- burst? --> 429
+  |-- Honeypot check (_hp field filled) -- bot? --> is_spam = true, still 201
+  |-- Geo enrichment: ip-api.com --(fails)--> ipapi.co --(fails)--> nulls
+  |-- Store submission (never blocks on the steps above)
+  |-- Safe side effect: confirmation email (try/catch, failure never
+       blocks the 201 response)
+
 
 Widget Owner (authenticated)
-|
-v
+  |
+  v
 Dashboard API
-GET /dashboard/widgets/:id/submissions (excludes spam by default)
-GET /dashboard/widgets/:id/stats (valid/spam counts, by_day,
-by_country)
-
+  GET /dashboard/widgets/:id/submissions   (excludes spam by default)
+  GET /dashboard/widgets/:id/stats         (valid/spam counts, by_day,
+                                             by_country)
+```
 
 ## Data model
 
