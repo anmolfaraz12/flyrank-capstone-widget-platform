@@ -73,7 +73,7 @@ Content-Type : application/json; charset=utf-8
 
 ### Widget renders on a different origin than the API
 
-`customer-site.html` served via `npx serve -p 5500` (origin `localhost:5500`), API on `localhost:4000`. Screenshot confirms:
+`customer-site.html` served via `npx serve -p 5500` (origin `localhost:5500`), API on `localhost:4000`. Manually tested live in Chrome, confirming:
 - Widget ("Newsletter Signup") renders correctly, with custom styling
 - Form submits successfully ("Thank you!" shown)
 - Browser console shows only an unrelated `favicon.ico 404` — no CORS or JS errors
