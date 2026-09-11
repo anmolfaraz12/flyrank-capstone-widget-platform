@@ -209,9 +209,9 @@ with a real command/output in `EVIDENCE.md`, including:
 
 ## Limitations
 
-- The widget UI is intentionally minimal (a form + submit button, no
-  styling framework) — the grading surface for this capstone is the
-  backend, not the CSS.
+- The widget UI is functional and lightly styled (custom CSS, no
+  framework) — the grading surface for this capstone is the backend
+  logic, not the visual design.
 - Email is a safe side effect only — no real SMTP provider is wired up;
   failure/success of the "send" step is what's tested, not real delivery.
 - Only local/Docker Postgres is used; no managed hosting is required for
